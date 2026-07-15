@@ -3,3 +3,7 @@ __pycache__/
 *.pyc
 .DS_Store
 run*.sh
+tacotron_env/
+wavs/
+preprocessed_dataset.pkl
+LJSpeech-1.1/

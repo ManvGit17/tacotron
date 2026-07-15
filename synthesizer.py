@@ -1,4 +1,47 @@
-import io
+import argparse
+import os
+import tensorflow as tf
+
+# Enable TF1 behavior in TF2
+tf.compat.v1.disable_v2_behavior()
+
+from hparams import hparams
+from models import create_model
+from text import text_to_sequence
+from util import audio
+
+def synthesize(model_name, checkpoint, text_input, output_dir):
+    tf.compat.v1.reset_default_graph()
+    with tf.compat.v1.Session() as sess:
+        model = create_model(model_name, hparams)
+        inputs = tf.compat.v1.placeholder(tf.int32, [1, None], 'inputs')
+        input_lengths = tf.compat.v1.placeholder(tf.int32, [1], 'input_lengths')
+
+        model.initialize(inputs, input_lengths)
+        saver = tf.compat.v1.train.Saver()
+        saver.restore(sess, checkpoint)
+
+        seq = text_to_sequence(text_input, [hparams.cleaners])
+        feed_dict = {inputs: [seq], input_lengths: [len(seq)]}
+        linear_output = sess.run(model.linear_outputs[0], feed_dict=feed_dict)
+        wav = audio.inv_spectrogram(linear_output.T)
+        audio.save_wav(wav, os.path.join(output_dir, 'synthesized.wav'))
+        print("✅ Saved synthesized audio to synthesized.wav")
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--model', default='tacotron')
+    parser.add_argument('--checkpoint', required=True)
+    parser.add_argument('--text', required=True)
+    parser.add_argument('--output_dir', default='.')
+    args = parser.parse_args()
+    synthesize(args.model, args.checkpoint, args.text, args.output_dir)
+
+if __name__ == '__main__':
+    main()
+
+
+''' import io
 import numpy as np
 import tensorflow as tf
 from hparams import hparams
@@ -38,3 +81,4 @@ class Synthesizer:
     out = io.BytesIO()
     audio.save_wav(wav, out)
     return out.getvalue()
+'''
