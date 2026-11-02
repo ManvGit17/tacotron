@@ -2,6 +2,36 @@
 
 An implementation of Tacotron speech synthesis in TensorFlow.
 
+> **About this fork.** This project is based on [keithito/tacotron](https://github.com/keithito/tacotron),
+> an older codebase originally written for TensorFlow 1.x and written by someone else (MIT licensed, see
+> [LICENSE](LICENSE)). All credit for the original model implementation goes to the original author and
+> contributors. In this fork we updated the code to work with newer tooling, fixed bugs, and made improvements.
+
+### Changes in this fork
+
+  * **Updated dependencies** in `requirements.txt` (e.g. librosa 0.10.1, numpy 1.26.4, scipy 1.11.4,
+    matplotlib 3.8.2) so the project installs on modern Python.
+  * **TensorFlow 2.x compatibility:** `train.py` and `synthesizer.py` now use `tf.compat.v1` APIs with
+    v2 behavior disabled; `tf.contrib`-based hyperparameters were replaced with a plain `HParams` class.
+  * **Command-line synthesizer:** `synthesizer.py` was rewritten as a script that takes `--checkpoint`,
+    `--text` and `--output_dir` and writes a `.wav` file.
+  * **Fixes:** https download link for the pretrained checkpoint, `create_model` handles model names
+    case-insensitively, and `.gitignore` now excludes local datasets and environments.
+  * **Added:** a project notebook (`tacotron_experiments.ipynb`).
+
+### Dataset and retraining
+
+  * We obtained our own copy of the **[LJ Speech 1.1](https://keithito.com/LJ-Speech-Dataset/) dataset**
+    (13,100 short English clips, roughly 24 hours, single speaker; the transcripts are in `metadata.csv`)
+    and **retrained the entire model from scratch** on it, rather than using the pretrained checkpoint
+    from the original project.
+  * The training and experiments are in `tacotron_experiments.ipynb`.
+
+### Tests
+
+  * The unit tests in `tests/` (text cleaners, number normalization, CMUDict) pass: 15/15.
+    Run them with `pip install pytest` then `python -m pytest tests`.
+
 
 ### Audio Samples
 
